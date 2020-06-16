@@ -26,9 +26,8 @@ function playGame(numPlayer,numDice)
     diceCount : 0,
     dice : []  
   }]
-  tempplayer = [{    
-    dice : []  
-  }]
+
+  
 
   for (let index = 0; index < numPlayer; index++) {  
     player.push({
@@ -36,21 +35,18 @@ function playGame(numPlayer,numDice)
       play : true,
       diceCount : numDice,
       dice : []  
-      });
-    tempplayer.push({    
-        dice : []  
-      });
+      });    
   }
   player.shift();
-  tempplayer.shift();
 
   playGame = true;
   step = 1;
   while(playGame)
   {
-    for (let index = 0; index < numPlayer; index++){
-      for (let index1 = 0; index1 < player[index].diceCount; index1++) 
-        player[index].dice.push(Math.floor(Math.random() * 6)+1)      
+    for (let index = 0; index < numPlayer; index++){  
+      if(player[index].play)    
+        for (let index1 = 0; index1 < player[index].diceCount; index1++) 
+          player[index].dice.push(Math.floor(Math.random() * 6)+1)      
     }
 
     document.getElementById("iterasi").innerHTML+="=========================================<br>";
@@ -59,31 +55,38 @@ function playGame(numPlayer,numDice)
   
     //evaluasi hasil
     for (let index = 0; index < numPlayer; index++)
-    {    
-      for (let index1 = 0; index1 < player[index].dice.length; index1++)
-      { 
-        if(player[index].dice[index1] == 1)
-        {
-          nextpost = index + 1;
-          if(nextpost >= numPlayer) 
-            nextpost = 0;
-          player[nextpost].dice.push(0);
-          player[nextpost].diceCount ++;
-          player[index].dice[index1] = 7;     
-          player[index].diceCount --;   
-        } else 
-        if(player[index].dice[index1] == 6)
-        {
-          player[index].dice[index1] = 7;
-          player[index].score ++;
-          player[index].diceCount --;
-        }
-      } 
-      player[index].dice.sort();  
+    { 
+      if(player[index].play)       
+        for (let index1 = 0; index1 < player[index].dice.length; index1++)
+        { 
+          if(player[index].dice[index1] == 1)
+          {
+            nextpost = index + 1;
+            if(nextpost >= numPlayer) 
+                nextpost = 0;        
+            while(player[nextpost].play == false)
+            {
+              nextpost ++;
+              if(nextpost >= numPlayer) 
+                nextpost = 0;        
+            }    
+            player[nextpost].dice.push(0);
+            player[nextpost].diceCount ++;
+            player[index].dice[index1] = 7;     
+            player[index].diceCount --;   
+          } else 
+          if(player[index].dice[index1] == 6)
+          {
+            player[index].dice[index1] = 7;
+            player[index].score ++;
+            player[index].diceCount --;
+          }
+        } 
+        player[index].dice.sort();  
     }
 
     for (let index = 0; index < numPlayer; index++)
-    {    
+    {       
       for (let index1 = 0; index1 < player[index].dice.length; index1++)
         if(player[index].dice[index1] == 0)
           player[index].dice[index1] = 1;        
@@ -95,11 +98,15 @@ function playGame(numPlayer,numDice)
     //cek berhenti
     playerOut = 0;
     player.forEach(element => {
-      if(element.diceCount == 0) playerOut++;
+      if(element.diceCount <= 0) 
+      {
+        playerOut++;
+        element.play = false;
+      }
     });
 
     step++;
-    if(numPlayer - playerOut == 1)  
+    if(numPlayer - playerOut == 1)      
     {
       playGame = false;
       
